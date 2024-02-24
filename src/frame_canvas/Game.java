@@ -52,6 +52,7 @@ public class Game extends Canvas implements Runnable {
         this.setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
         initFrame();
         image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        setFocusable(false);
     }
 
     public void initFrame() {
@@ -65,11 +66,6 @@ public class Game extends Canvas implements Runnable {
             public void keyReleased(KeyEvent e) {
                 Game.this.keyReleased(e);
             }
-        });
-
-        // Adicionando um MouseListener vazio
-        frame.addMouseListener(new MouseAdapter() {
-            // Nada será feito nos métodos do MouseListener
         });
 
         frame.add(this);
@@ -127,26 +123,26 @@ public class Game extends Canvas implements Runnable {
         // e verifica se atingiu os limites da janela
         if (leftPressed) {
             playerX -= playerSpeed;
-            if (playerX < -16) {
-                playerX = WIDTH - player[0].getWidth() + 16;
+            if (playerX < 0) {
+                playerX = WIDTH - player[1].getWidth() + 16;
             }
         }
         if (rightPressed) {
             playerX += playerSpeed;
             if (playerX > WIDTH - player[0].getWidth() + 16) {
-                playerX = -16;
+                playerX = 0;
             }
         }
         if (upPressed) {
             playerY -= playerSpeed;
-            if (playerY < 0 - 16) {
-                playerY = HEIGHT - player[0].getHeight() + 16;
+            if (playerY < 0 - 8) {
+                playerY = HEIGHT - player[0].getHeight() + 8;
             }
         }
         if (downPressed) {
             playerY += playerSpeed;
-            if (playerY > HEIGHT - player[0].getHeight() + 16) {
-                playerY = 0 - 16;
+            if (playerY > HEIGHT - player[0].getHeight() + 8) {
+                playerY = 0 - 8;
             }
         }
         
@@ -201,24 +197,75 @@ public class Game extends Canvas implements Runnable {
             this.createBufferStrategy(3);
             return;
         }
+
         Graphics g = image.getGraphics();
         g.setColor(new Color(19, 19, 19));
-        g.fillRect(0,  0, WIDTH, HEIGHT);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // Verifica se o jogador está se movendo para a esquerda
-        if (playerDirectionX == -1) { // Esquerda
-            // Cria uma transformação para inverter horizontalmente
-            AffineTransform transform = new AffineTransform();
-            transform.translate(player[currAnimation].getWidth(), 0);
-            transform.scale(-1, 1);
-            AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            // Aplica a transformação no sprite e desenha o sprite invertido horizontalmente
-            BufferedImage invertedPlayer = op.filter(player[currAnimation], null);
-            g2.drawImage(invertedPlayer, playerX, playerY, null);
-        } else { // Direita
-            g2.drawImage(player[currAnimation], playerX, playerY, null);
+        // Verifica se a parte da ovelha está fora da tela na horizontal
+     // Calcula a posição X da parte oposta da ovelha
+        int oppositeX = (playerX < 0) ? playerX - WIDTH : playerX - WIDTH;
+        
+        if (playerX < 0 || playerX + 16 > WIDTH) {
+        	System.out.println("menor que 0 ou maior que width");
+            if (playerDirectionX == 1) { // Direita
+//            	System.out.println("direita 1");
+                g2.drawImage(player[currAnimation], playerX, playerY, null);
+            } else { // Esquerda
+            	System.out.println("esquerda 1");
+            	 // Inverte a imagem horizontalmente
+                AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                tx.translate(-player[currAnimation].getWidth(null), 0);
+                AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                BufferedImage reversedImage = op.filter(player[currAnimation], null);
+                g2.drawImage(reversedImage, oppositeX, playerY, null);
+            }
+
+            
+            // Desenha a parte oposta da ovelha
+            if (playerDirectionX == -1) { // Esquerda
+            	 AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+               tx.translate(-player[currAnimation].getWidth(null), 0);
+               AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+               BufferedImage reversedImage = op.filter(player[currAnimation], null);
+               g2.drawImage(reversedImage, playerX, playerY, null);
+            } else { // Direita
+                g2.drawImage(player[currAnimation], oppositeX, playerY, null);
+            }
+        } else {
+            // Desenha a ovelha normalmente sem considerar a parte oposta
+            if (playerDirectionX == -1) { // Esquerda
+            	System.out.println("esquerda 2");
+            	 // Inverte a imagem horizontalmente
+                AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                tx.translate(-player[currAnimation].getWidth(null), 0);
+                AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                BufferedImage reversedImage = op.filter(player[currAnimation], null);
+                g2.drawImage(reversedImage, playerX, playerY, null);            
+                } else { // Direita
+//                	System.out.println("direita 2");
+                g2.drawImage(player[currAnimation], playerX, playerY, null);
+            }
+        }
+
+        // Verifica se a parte da ovelha está fora da tela na vertical
+        if (playerY < 0 || playerY + player[currAnimation].getHeight() > HEIGHT) {
+            // Calcula a posição Y da parte oposta da ovelha
+            int oppositeY = (playerY < 0) ? playerY + HEIGHT : playerY - HEIGHT;
+            if (playerDirectionX == -1) { // Esquerda
+            	System.out.println("esquerda 2");
+            	// Inverte a imagem horizontalmente
+                AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                tx.translate(-player[currAnimation].getWidth(null), 0);
+                AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                BufferedImage reversedImage = op.filter(player[currAnimation], null);
+                g2.drawImage(reversedImage, playerX, oppositeY, null);            
+                } else { // Direita
+//                	System.out.println("direita 2");
+                g2.drawImage(player[currAnimation], playerX, oppositeY, null);
+            }
         }
 
         g.dispose();
@@ -226,6 +273,7 @@ public class Game extends Canvas implements Runnable {
         g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
         bs.show();
     }
+
 
     public void run() {
         long lastTime = System.nanoTime();

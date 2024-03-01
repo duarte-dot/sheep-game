@@ -1,9 +1,9 @@
 /**
- * 
+ *
  */
 /**
- * 
+ *
  */
-module frame_canvas {
+module sheep_game {
 	requires java.desktop;
 }

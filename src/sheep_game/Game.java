@@ -1,4 +1,4 @@
-package frame_canvas;
+package sheep_game;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -15,10 +15,13 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 public class Game extends Canvas implements Runnable {
 
-    // Variáveis de Dimensão da Janela
+    private static final long serialVersionUID = 1L;
+
+	// Variáveis de Dimensão da Janela
     private final int WIDTH = 160;
     private final int HEIGHT = 120;
     private final int SCALE = 3;
@@ -73,7 +76,8 @@ public class Game extends Canvas implements Runnable {
                 Game.this.keyPressed(e);
             }
 
-            public void keyReleased(KeyEvent e) {
+            @Override
+			public void keyReleased(KeyEvent e) {
                 Game.this.keyReleased(e);
             }
         });
@@ -82,7 +86,7 @@ public class Game extends Canvas implements Runnable {
         frame.setResizable(false);
         frame.pack();
         frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
         frame.addFocusListener(new FocusListener() {
@@ -185,11 +189,11 @@ public class Game extends Canvas implements Runnable {
         g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
         bs.show();
     }
-    
+
     public void drawPlayer(Graphics2D g2, int x, int y) {
         g2.drawImage(player[currAnimation], x, y, null);
     }
-    
+
     public void drawReversedPlayer(Graphics2D g2, int x, int y) {
     	AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
         tx.translate(-player[currAnimation].getWidth(null), 0);
@@ -265,7 +269,8 @@ public class Game extends Canvas implements Runnable {
     }
 
     // Método de execução da Thread
-    public void run() {
+    @Override
+	public void run() {
         long lastTime = System.nanoTime();
         double amountOfTicks = 60.0;
         double ns = 1000000000 / amountOfTicks;
